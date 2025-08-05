@@ -281,7 +281,15 @@ class RunnerUsageAnalyzer:
                 total_seconds = int(duration.total_seconds())
                 minutes = total_seconds // 60
                 seconds = total_seconds % 60
-                return f"{minutes:02d}:{seconds:02d}"
+                start_time = self._parse_iso_datetime(started_at)
+                end_time = self._parse_iso_datetime(completed_at)
+                if start_time and end_time:
+                    duration = end_time - start_time
+                    
+                    total_seconds = int(duration.total_seconds())
+                    minutes = total_seconds // 60
+                    seconds = total_seconds % 60
+                    return f"{minutes:02d}:{seconds:02d}"
         except (ValueError, TypeError) as e:
             self.logger.debug(f"Failed to calculate duration: {e}")
         
