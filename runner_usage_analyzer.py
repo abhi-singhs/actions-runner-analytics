@@ -1051,7 +1051,6 @@ class ReportGenerator:
         
         return html
     
-        return html
     
     def _generate_table_header_html(self, is_grouped: bool) -> str:
         """Generate HTML for table header based on data type."""
