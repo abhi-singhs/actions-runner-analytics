@@ -75,13 +75,13 @@ jobs:
           python runner_usage_analyzer.py
       
       - name: Upload CSV Report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: runner-usage-csv-report
           path: runner_usage_report.csv
       
       - name: Upload HTML Report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: runner-usage-html-report
           path: runner_usage_report.html
