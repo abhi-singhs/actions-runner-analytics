@@ -944,7 +944,14 @@ class ReportGenerator:
                 }}
                 
                 // Handle date sorting
-                if (column === 7 || aText.match(/^\\d{{4}}-\\d{{2}}-\\d{{2}}/)) {{ // Run Date column or date format
+                if (column === DURATION_COLUMN_INDEX || (column === RUN_ID_COLUMN_INDEX && aText.match(/^\\d+$/))) {{ // Duration column or numeric data
+                    const aMinutes = parseDuration(aText);
+                    const bMinutes = parseDuration(bText);
+                    return direction === 'asc' ? aMinutes - bMinutes : bMinutes - aMinutes;
+                }}
+                
+                // Handle date sorting
+                if (column === RUN_DATE_COLUMN_INDEX || aText.match(/^\\d{{4}}-\\d{{2}}-\\d{{2}}/)) {{ // Run Date column or date format
                     const aDate = new Date(aText);
                     const bDate = new Date(bText);
                     return direction === 'asc' ? aDate - bDate : bDate - aDate;
