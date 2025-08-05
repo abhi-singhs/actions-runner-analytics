@@ -1,0 +1,105 @@
+name: Runner Usage Monitor
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Daily at midnight
+  workflow_dispatch:
+    inputs:
+      runner_label:
+        description: 'Filter by specific runner label (optional)'
+        required: false
+        type: string
+      days_back:
+        description: 'Number of days to analyze'
+        required: false
+        default: '30'
+        type: string
+      group_by:
+        description: 'Group results by field'
+        required: false
+        default: 'none'
+        type: choice
+        options:
+          - none
+          - repo
+          - label
+          - status
+          - workflow
+          - branch
+          - runner_type
+          - cost_category
+      status_filter:
+        description: 'Filter by job status (optional)'
+        required: false
+        type: choice
+        options:
+          - ''
+          - completed
+          - failure
+          - cancelled
+          - in_progress
+      repo_filter:
+        description: 'Filter by repository name pattern (optional)'
+        required: false
+        type: string
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+      
+      - name: Analyze Runner Usage
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          ORG_NAME: ${{ secrets.ORG_NAME }}
+          TARGET_RUNNER_LABEL: ${{ inputs.runner_label || '' }}
+          DAYS_BACK: ${{ inputs.days_back || '30' }}
+          GROUP_BY: ${{ inputs.group_by || 'none' }}
+          STATUS_FILTER: ${{ inputs.status_filter || '' }}
+          REPO_FILTER: ${{ inputs.repo_filter || '' }}
+        run: |
+          python runner_usage_analyzer.py
+      
+      - name: Upload CSV Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: runner-usage-csv-report
+          path: runner_usage_report.csv
+      
+      - name: Upload HTML Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: runner-usage-html-report
+          path: runner_usage_report.html
+      
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+        
+      - name: Upload to GitHub Pages
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: ./
+          
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
+        
+      - name: Report Status
+        run: |
+          echo "✅ Runner usage report generated successfully!"
+          echo "📊 View the interactive report at: ${{ steps.deployment.outputs.page_url }}"
+          echo "📄 Download CSV report from the artifacts section"
